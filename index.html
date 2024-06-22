@@ -1,53 +1,58 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>World Editor</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <h1>World Editor</h1>
     <canvas id="myCanvas"></canvas>
     <div id="controls">
-        <button onclick="dispose()">🗑️</button>
-        <button onclick="save()">💾</button>
+      <button onclick="dispose()">🗑️</button>
+      <button onclick="save()">💾</button>
     </div>
 
+    <script src="js/world.js"></script>
     <script src="js/graphEditor.js"></script>
     <script src="js/viewport.js"></script>
-    <script src="js/math/graph.js"></script>
     <script src="js/math/utils.js"></script>
+    <script src="js/math/graph.js"></script>
     <script src="js/primitives/point.js"></script>
     <script src="js/primitives/segment.js"></script>
+    <script src="js/primitives/polygon.js"></script>
+    <script src="js/primitives/envelope.js"></script>
     <script>
-        myCanvas.width = 600;
-        myCanvas.height = 600;
+      myCanvas.width = 600;
+      myCanvas.height = 600;
 
-        const ctx = myCanvas.getContext("2d");
+      const ctx = myCanvas.getContext("2d");
 
-        const graphString = localStorage.getItem("graph");
-        const graphInfo = graphString ? JSON.parse(graphString) : null;
+      const graphString = localStorage.getItem("graph");
+      const graphInfo = graphString ? JSON.parse(graphString) : null;
+      const graph = graphInfo ? Graph.load(graphInfo) : new Graph();
+      const world = new World(graph);
 
-        const graph = graphInfo
-            ? Graph.load(graphInfo)
-            : new Graph();
-        const viewport = new Viewport(myCanvas);
-        const graphEditor = new GraphEditor(viewport, graph);
+      const viewport = new Viewport(myCanvas);
+      const graphEditor = new GraphEditor(viewport, graph);
 
-        animate();
+      animate();
 
-        function animate(){
-            viewport.reset();
-            graphEditor.display();
-            requestAnimationFrame(animate); 
-        }
+      function animate() {
+        viewport.reset();
+        world.generate();
+        world.draw(ctx);
+        ctx.globalAlpha = 0.3;
+        graphEditor.display();
+        requestAnimationFrame(animate);
+      }
 
-        function dispose(){
-            graphEditor.dispose();
-        }
+      function dispose() {
+        graphEditor.dispose();
+      }
 
-        function save(){
-            localStorage.setItem("graph", JSON.stringify(graph));
-        }
+      function save() {
+        localStorage.setItem("graph", JSON.stringify(graph));
+      }
     </script>
-</body>
+  </body>
 </html>
